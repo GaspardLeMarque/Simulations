@@ -99,3 +99,28 @@ diff_est_true = array(data = rep(NA, nx * ny * rep), c(nx, ny, rep),
 for (i in 1:rep){
   diff_est_true[,,i] = estimates[,,i] - true_values[,]
 }
+
+#Equalize average difference and bias
+bias_estimates = aver_est - true_values
+
+#Relative bias
+rel_bias_estimates = bias_estimates / true_values
+
+#Variances of estimates
+var_estimates = array(data = rep(NA, nx * ny), c(nx, ny),
+        dimnames = list(as.character(xcoordinates), as.character(ycoordinates)))
+
+for (i in 1:nx){
+  for (j in 1:ny){
+    var_estimates[i,j] = var(estimates[i,j,])
+  }
+}
+
+#RMSE of estimates
+rmse_estimates = array(data = rep(NA, nx * ny), c(nx, ny),
+                      dimnames = list(as.character(xcoordinates), as.character(ycoordinates)))
+for (i in 1:nx){
+  for (j in 1:ny){
+    rmse_estimates[i,j] = sqrt(mean(diff_est_true[i,j,]^2))
+  }
+}
