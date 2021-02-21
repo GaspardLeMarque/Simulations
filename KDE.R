@@ -3,7 +3,7 @@ library(ks)
 library(viridis)
 library(MASS)
 library(plotly)
-library(bivariate) # produces the density functions
+library(bivariate) #produces the density functions
 library(tidyverse)
 library(ggExtra) #compare marginal densities
 
@@ -38,7 +38,7 @@ x1_low <- -10
 x1_up <- 10
 x2_low <- -10
 x2_up <- 10
-upper <- cubvpdf(a.X = x1_low, b.X = x1_up, a.Y = x2_low, b.Y = x2_up) # interval
+upper <- cubvpdf(a.X = x1_low, b.X = x1_up, a.Y = x2_low, b.Y = x2_up) #Interval
 
 #Add constant
 sampled <- data.frame(x = runif(100000, x1_low, x1_up), y = runif(100000,x2_low,x2_up))
@@ -86,7 +86,7 @@ for (i in 1:rep){
 #Third dimension: simulations
 
 #Grid resolution
-nx = 501
+nx = 151
 ny = nx
 xmin = -10
 ymin = -10
@@ -99,14 +99,24 @@ ycoordinates = seq(ymin, ymax, length.out = ny)
 estimates = array(data = rep(NA, nx * ny * rep), c(nx, ny, rep),
                   dimnames = list(as.character(xcoordinates), as.character(ycoordinates),
                                   as.character(c(1:rep))))
+
 #Kernel density estimation
-for (i in 1:rep){
-  Hpi <- ks::Hpi(x = data[,,i])
-  kdeHpi <- ks::kde(x = data[,,i], H = Hpi,
-                    xmin=c(xmin,ymin), xmax=c(xmax,ymax),
-                    gridsize = c(nx,ny), bgridsize=c(nx,ny))
-  estimates[,,i] = kdeHpi$estimate
+#Silverman's rule of thumb case
+if (selector == "sil"){
+  for (i in 1:rep){
+    H <- calc_sil(data[,,i])
+    kdeHpi <- ks::kde(x = data[,,i], H = H, xmin=c(xmin,ymin), xmax=c(xmax,ymax), gridsize=c(nx,ny))
+    estimates[,,i] = kdeHpi$estimate
+  }
+#Standard case  
+} else { 
+  for (i in 1:rep){
+    Hpi <- ks::Hpi(x = data[,,i])
+    kdeHpi <- ks::kde(x = data[,,i], H = Hpi, xmin=c(xmin,ymin), xmax=c(xmax,ymax), gridsize=c(nx,ny))
+    estimates[,,i] = kdeHpi$estimate
+  }
 }
+
 #Average estimate
 aver_est = array(data = rep(NA, nx * ny), c(nx, ny),
                  dimnames = list(as.character(xcoordinates), as.character(ycoordinates)))
@@ -121,7 +131,7 @@ for (i in 1:nx) {
 true_values = array(data = rep(NA, nx * ny), c(nx, ny),
                     dimnames = list(as.character(xcoordinates), as.character(ycoordinates)))
 
-#Calculate true density values
+#True density values
 for (i in 1:nx) {
   xvalue = xcoordinates[i]
   for (j in 1:ny){
@@ -141,10 +151,10 @@ for (i in 1:rep){
 #Equalize average difference and bias
 bias_estimates = aver_est - true_values
 
-#Calculate relative bias
+#Relative bias
 rel_bias_estimates = bias_estimates / true_values
 
-#Calculate variances of estimates
+#Variances of estimates
 var_estimates = array(data = rep(NA, nx * ny), c(nx, ny),
                       dimnames = list(as.character(xcoordinates), as.character(ycoordinates)))
 
