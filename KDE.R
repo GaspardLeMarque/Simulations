@@ -5,7 +5,10 @@ library(plotly)
 library(bivariate) #produces the density functions
 library(tidyverse)
 library(tictoc) #measures performance
-
+library(gsl)
+library(copula)
+library(reshape2)
+library(bivariate)
 
 
 ### Functions ###
@@ -43,6 +46,31 @@ ARS <- function(target, approx, x_low, x_up, y_low, y_up, n, c){
   return(output)
 }
 
+#Function for Riemann integral approximation
+apxrint <- function(x, y = NULL, f) {
+  stopifnot(is.matrix(f)|is.vector(f))
+  stopifnot(is.vector(x))
+  stopifnot(is.vector(y)| is.null(y))
+  
+  if (is.vector(f) & is.vector(x)){
+    stopifnot(length(f) == length(x))
+    nonan <- !is.na(f)
+    nn <- sum(nonan)
+    if(nn < 2L) return(0)
+    Y <- f[nonan]
+    X <- x[nonan]
+    return(0.5 * sum( (Y[-1] + Y[-nn]) * diff(X)))
+  }
+  else if (is.matrix(f) & is.vector(x) & is.vector(y)){
+    Lf <- dim(f); Lx <- length(x); Ly <- length(y)
+    stopifnot((Lf == c(Lx, Ly)) | (t(Lf) == c(Lx, Ly)))
+    nan <- is.na(f)
+    f[nan] <- 0
+    f[2:(Lx-1), ] = f[2:(Lx-1), ] * 2;
+    f[, 2:(Ly-1)] = f[ , 2:(Ly-1)] * 2;
+    return(sum(f) * diff(x)[1] * diff(y)[1] / 4)
+  }
+}
 
 #### Standard Normal #####
 
@@ -183,3 +211,37 @@ for (i in 1:nx){
     rmse_estimates[i,j] = sqrt(mean(diff_est_true[i,j,]^2))
   }
 }
+
+#Squared differences of estimate and true value
+sq_diff_est_true = diff_est_true^2
+
+if(selector == 'sil'){
+  IMSE_silver_standard_normal = vector(mode = 'numeric', length = rep)
+  for (i in 1:rep){
+    IMSE_silver_standard_normal[i] <- apxrint(xcoordinates, ycoordinates, sq_diff_est_true[,,i])
+  }
+} else{
+  IMSE_standard_normal = vector(mode = 'numeric', length = rep)
+  for (i in 1:rep){
+    IMSE_standard_normal[i] <- apxrint(xcoordinates, ycoordinates, sq_diff_est_true[,,i])
+  }
+}
+
+#Save the data (Change for different selectors)
+aver_est_normal_silver <- aver_est
+#OR aver_est_normal <- aver_est
+bias_estimates_normal_silver <- bias_estimates 
+#OR bias_estimates_normal <- bias_estimates 
+rmse_estimates_normal_silver <- rmse_estimates
+#OR rmse_estimates_normal <- rmse_estimates
+true_est_normal_silver <- true_values
+#OR true_est_normal <- true_values
+IMSE_normal_silver <- IMSE_silver_standard_normal
+#OR IMSE_normal <- IMSE_standard_normal
+save(list=c("IMSE_normal_silver", 
+            "aver_est_normal_silver", 
+            "bias_estimates_normal_silver", 
+            "rmse_estimates_normal_silver", 
+            "true_est_normal_silver", 
+            "log.txt_normal_silver"), file = "normal_silver.RDA")
+#OR save(list=c("IMSE_normal", "aver_est_normal", "bias_estimates_normal", "rmse_estimates_normal", "true_est_normal", "log.txt_normal"), file = "normal.RDA")
