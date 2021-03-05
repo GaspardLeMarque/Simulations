@@ -1,5 +1,5 @@
 #KDE in the multivariate case
-library(ks)
+library(ks) #KDE
 library(MASS)
 library(plotly)
 library(bivariate) #produces the density functions
@@ -9,6 +9,8 @@ library(gsl)
 library(copula)
 library(reshape2)
 library(bivariate)
+library(sparr) #Adaptive Kernel Density Estimate
+
 
 
 ### Functions ###
@@ -245,3 +247,77 @@ save(list=c("IMSE_normal_silver",
             "true_est_normal_silver", 
             "log.txt_normal_silver"), file = "normal_silver.RDA")
 #OR save(list=c("IMSE_normal", "aver_est_normal", "bias_estimates_normal", "rmse_estimates_normal", "true_est_normal", "log.txt_normal"), file = "normal.RDA")
+
+### Adaptive KDE ### 
+estimates = array(data = rep(NA, nx * ny * rep), c(nx, ny, rep),
+                  dimnames = list(as.character(xcoordinates), as.character(ycoordinates),
+                                  as.character(c(1:rep))))
+#AKDE
+h0 <- 0.20 
+tic.clearlog()
+for (i in 1:rep) {
+  tic()
+  ppp = as.ppp(X = data[,,i], c(xmin, xmax, ymin, ymax))
+  pilot = bivariate.density(pp = ppp, h0=h0, parallelise = TRUE, resolution = nx)
+  AKDE = bivariate.density(pp = ppp, h0=h0, pilot.density = pilot$z, adapt = TRUE, parallelise = TRUE, resolution = nx, verbose = FALSE)
+  estimates[,,i] = t(AKDE$z$v)
+  toc(log = TRUE, quiet = TRUE)
+}
+
+log.txt_normal_AKDE <- tic.log(format = TRUE)
+
+#Average estimate
+aver_est = array(data = rep(NA, nx * ny), c(nx, ny),
+                 dimnames = list(as.character(xcoordinates), as.character(ycoordinates)))
+
+for (i in 1:nx) {
+  for (j in 1:ny){
+    aver_est[i,j] = mean(estimates[i,j,])
+  }
+}
+
+#Difference of true values and estimates
+diff_est_true = array(data = rep(NA, nx * ny * rep), c(nx, ny, rep),
+                      dimnames = list(as.character(xcoordinates), as.character(ycoordinates), as.character(c(1:rep))))
+for (i in 1:rep){
+  diff_est_true[,,i] = estimates[,,i] - true_values[,]
+}
+
+#Average difference = bias
+bias_estimates = aver_est - true_values
+
+#Relative bias
+rel_bias_estimates = bias_estimates / true_values
+
+#Variances of estimates
+var_estimates = array(data = rep(NA, nx * ny), c(nx, ny),
+                      dimnames = list(as.character(xcoordinates), as.character(ycoordinates)))
+
+for (i in 1:nx){
+  for (j in 1:ny){
+    var_estimates[i,j] = var(estimates[i,j,])
+  }
+}
+
+#RMSE of estimates
+rmse_estimates = array(data = rep(NA, nx * ny), c(nx, ny),
+                       dimnames = list(as.character(xcoordinates), as.character(ycoordinates)))
+for (i in 1:nx){
+  for (j in 1:ny){
+    rmse_estimates[i,j] = sqrt(mean(diff_est_true[i,j,]^2))
+  }
+}
+
+#Squared differences of estimate and true value
+sq_diff_est_true = diff_est_true^2
+IMSE = vector(mode = 'numeric', length = rep)
+for (i in 1:rep){
+  IMSE[i] <- apxrint(xcoordinates, ycoordinates, sq_diff_est_true[,,i])
+}
+
+#Save the data
+aver_est_normal_AKDE <- aver_est
+IMSE_normal_AKDE <- IMSE
+rmse_estimates_normal_AKDE <- rmse_estimates
+bias_estimates_normal_AKDE <- bias_estimates
+save(list=c("aver_est_normal_AKDE", "IMSE_normal_AKDE", "rmse_estimates_normal_AKDE", "bias_estimates_normal_AKDE", "log.txt_normal_AKDE"), file = "standard_normal_AKDE.RDA")
