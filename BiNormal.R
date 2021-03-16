@@ -251,3 +251,173 @@ save(list=c("IMSE_bimodal_normal_silver",
 #IMSE_bimodal_normal <- IMSE_bimodal_normal
 
 #OR save(list=c("IMSE_bimodal_normal", "aver_est_bimodal_normal", "bias_estimates_bimodal_normal", "rmse_estimates_bimodal_normal", "true_est_bimodal_normal", "log.txt_bimodal"), file = "bimodal.RDA")
+
+### Adaptive KDE ###
+
+estimates = array(data = rep(NA, nx * ny * rep), c(nx, ny, rep),
+                  dimnames = list(as.character(xcoordinates), as.character(ycoordinates),
+                                  as.character(c(1:rep))))
+
+#AKDE
+h0 <- 0.20
+tic.clearlog()
+for (i in 1:rep) {
+  tic()
+  ppp = as.ppp(X = data[,,i], c(xmin, xmax, ymin, ymax))
+  pilot = bivariate.density(pp = ppp, h0=h0, parallelise = TRUE, resolution = nx)
+  AKDE = bivariate.density(pp = ppp, h0=h0, pilot.density = pilot$z, adapt = TRUE, parallelise = TRUE, resolution = nx, verbose = FALSE)
+  estimates[,,i] = t(AKDE$z$v)
+  toc(log = TRUE, quiet = TRUE)
+}
+
+log.txt_bimodal_AKDE <- tic.log(format = TRUE)
+
+#Average estimate
+aver_est = array(data = rep(NA, nx * ny), c(nx, ny),
+                 dimnames = list(as.character(xcoordinates), as.character(ycoordinates)))
+
+for (i in 1:nx) {
+  for (j in 1:ny){
+    aver_est[i,j] = mean(estimates[i,j,])
+  }
+}
+
+#Difference of true values and estimates
+diff_est_true = array(data = rep(NA, nx * ny * rep), c(nx, ny, rep),
+                      dimnames = list(as.character(xcoordinates), as.character(ycoordinates), as.character(c(1:rep))))
+for (i in 1:rep){
+  diff_est_true[,,i] = estimates[,,i] - true_values[,]
+}
+
+#Average difference = bias
+bias_estimates = aver_est - true_values
+
+#Relative bias
+rel_bias_estimates = bias_estimates / true_values
+
+#Variances of estimates
+var_estimates = array(data = rep(NA, nx * ny), c(nx, ny),
+                      dimnames = list(as.character(xcoordinates), as.character(ycoordinates)))
+
+for (i in 1:nx){
+  for (j in 1:ny){
+    var_estimates[i,j] = var(estimates[i,j,])
+  }
+}
+
+#RMSE of estimates
+rmse_estimates = array(data = rep(NA, nx * ny), c(nx, ny),
+                       dimnames = list(as.character(xcoordinates), as.character(ycoordinates)))
+for (i in 1:nx){
+  for (j in 1:ny){
+    rmse_estimates[i,j] = sqrt(mean(diff_est_true[i,j,]^2))
+  }
+}
+
+#Squared differences of estimate and true
+sq_diff_est_true = diff_est_true^2
+IMSE = vector(mode = 'numeric', length = rep)
+for (i in 1:rep){
+  IMSE[i] <- apxrint(xcoordinates, ycoordinates, sq_diff_est_true[,,i])
+}
+
+aver_est_bimodal_AKDE <- aver_est
+IMSE_bimodal_AKDE <- IMSE
+rmse_estimates_bimodal_AKDE <- rmse_estimates
+bias_estimates_bimodal_AKDE <- bias_estimates
+
+save(list=c("aver_est_bimodal_AKDE", 
+			"IMSE_bimodal_AKDE", 
+			"rmse_estimates_bimodal_AKDE", 
+			"bias_estimates_bimodal_AKDE", 
+			"log.txt_bimodal_AKDE"), file = "bimodal_AKDE.RDA")
+
+### kNN Density ###
+
+data = array(data = rep(NA, n * dim * rep), c(n, dim, rep))
+estimates = array(data = rep(NA, nx * ny * rep), c(nx, ny, rep),
+                  dimnames = list(as.character(xcoordinates), as.character(ycoordinates),
+                                  as.character(c(1:rep))))
+
+tic.clearlog()
+for(i in 1:rep){
+  tic()
+  KNN <- knnDE(X=data[,,i], Grid = Grid, k = 10)
+  estimates[,,i] <- matrix(data = KNN, nrow = length(xcoordinates))
+  toc(log = TRUE, quiet = TRUE)
+}
+
+log.txt_bimodal_KNN <- tic.log(format = TRUE)
+
+aver_est = array(data = rep(NA, nx * ny), c(nx, ny),
+                 dimnames = list(as.character(xcoordinates), as.character(ycoordinates)))
+
+
+for (i in 1:nx) {
+  for (j in 1:ny){
+    aver_est[i,j] = mean(estimates[i,j,])
+  }
+}
+
+#Theoretical density values on grid points
+true_values = array(data = rep(NA, nx * ny), c(nx, ny),
+                    dimnames = list(as.character(xcoordinates), as.character(ycoordinates)))
+
+#True density values
+for (i in 1:nx) {
+  xvalue = xcoordinates[i]
+  for (j in 1:ny){
+    yvalue = ycoordinates[j]
+    true_values[i,j] = bi_mix(xvalue, yvalue)
+  }
+}
+#Difference of true values and estimates
+diff_est_true = array(data = rep(NA, nx * ny * rep), c(nx, ny, rep),
+                      dimnames = list(as.character(xcoordinates), as.character(ycoordinates), as.character(c(1:rep))))
+for (i in 1:rep){
+  diff_est_true[,,i] = estimates[,,i] - true_values[,]
+}
+
+#Average difference = bias
+bias_estimates = aver_est - true_values
+
+#Relative bias
+rel_bias_estimates = bias_estimates / true_values
+
+#Variances of estimates
+var_estimates = array(data = rep(NA, nx * ny), c(nx, ny),
+                      dimnames = list(as.character(xcoordinates), as.character(ycoordinates)))
+
+for (i in 1:nx){
+  for (j in 1:ny){
+    var_estimates[i,j] = var(estimates[i,j,])
+  }
+}
+
+#RMSE of estimates
+rmse_estimates = array(data = rep(NA, nx * ny), c(nx, ny),
+                       dimnames = list(as.character(xcoordinates), as.character(ycoordinates)))
+for (i in 1:nx){
+  for (j in 1:ny){
+    rmse_estimates[i,j] = sqrt(mean(diff_est_true[i,j,]^2))
+  }
+}
+
+#Squared differences of estimate and true value
+sq_diff_est_true = diff_est_true^2
+IMSE = vector(mode = 'numeric', length = rep)
+for (i in 1:rep){
+  IMSE[i] <- apxrint(xcoordinates, ycoordinates, sq_diff_est_true[,,i])
+}
+
+#Save the data
+IMSE_bimodal_KNN <- IMSE
+aver_est_bimodal_KNN <- aver_est
+rmse_estimates_bimodal_KNN <- rmse_estimates
+bias_estimates_bimodal_KNN <- bias_estimates
+
+save(list=c("aver_est_bimodal_KNN", 
+			"IMSE_bimodal_KNN", 
+			"rmse_estimates_bimodal_KNN", 
+			"bias_estimates_bimodal_KNN", 
+			"log.txt_bimodal_KNN"), file = "bimodal_KNN.RDA")
