@@ -127,9 +127,7 @@ plot_est_bimodal_KNN <- plot_ly(est_bimodal_KNN,  x = ~x, y = ~y, z= ~Density, t
                                               yaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
                                               legend = list(font=list(size = 20)))
 
-
-
-p<-subplot(plot_est_bimodal_normal, plot_est_bimodal_AKDE, plot_est_bimodal_KNN)
+p <- subplot(plot_est_bimodal_normal, plot_est_bimodal_AKDE, plot_est_bimodal_KNN)
 legend <- plot_ly(est_bimodal_KNN,  x = ~x, y = ~y, z= ~Density, type = "contour",
                   colorscale = 'Jet',
                   contours = list(
@@ -165,8 +163,6 @@ plot_rmse_bimodal_normal <- plot_ly(rmse_bimodal_normal,  x = ~x, y = ~y, z= ~De
                                                   yaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
                                                   legend = list(font=list(size = 20)))
 
-
-
 plot_rmse_bimodal_AKDE <- plot_ly(rmse_bimodal_AKDE,  x = ~x, y = ~y, z= ~Density, type = "contour",showscale = FALSE,
                                   colorscale = 'Jet',
                                   contours = list(
@@ -176,7 +172,6 @@ plot_rmse_bimodal_AKDE <- plot_ly(rmse_bimodal_AKDE,  x = ~x, y = ~y, z= ~Densit
                                   )) %>% layout(xaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
                                                 yaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
                                                 legend = list(font=list(size = 20)))
-
 
 plot_rmse_bimodal_KNN <- plot_ly(rmse_bimodal_KNN,  x = ~x, y = ~y, z= ~Density, type = "contour",showscale = FALSE,
                                  colorscale = 'Jet',
@@ -188,7 +183,7 @@ plot_rmse_bimodal_KNN <- plot_ly(rmse_bimodal_KNN,  x = ~x, y = ~y, z= ~Density,
                                                yaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
                                                legend = list(font=list(size = 20)))
 
-p<-subplot(plot_rmse_bimodal_normal, plot_rmse_bimodal_AKDE, plot_rmse_bimodal_KNN)
+p <- subplot(plot_rmse_bimodal_normal, plot_rmse_bimodal_AKDE, plot_rmse_bimodal_KNN)
 legend <- plot_ly(rmse_bimodal_KNN,  x = ~x, y = ~y, z= ~Density, type = "contour",
                   colorscale = 'Jet',
                   contours = list(
@@ -259,7 +254,7 @@ plot_bias_bimodal_KNN <- plot_ly(
   add_surface(colorbar=list(title="Density")) %>%
   layout(scene = list(zaxis = z_axis_bimodal))
 
-p<- subplot(plot_bias_bimodal_normal, plot_bias_bimodal_AKDE, plot_bias_bimodal_KNN)
+p <- subplot(plot_bias_bimodal_normal, plot_bias_bimodal_AKDE, plot_bias_bimodal_KNN)
 legend <- plot_ly(
   x = xcoordinates, 
   y = ycoordinates, 
@@ -293,7 +288,7 @@ legend <- plot_ly(true_bimodal_normal, x = ~x, y = ~y, z= ~Density, type = "cont
                                 yaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
                                 legend = list(font=list(size = 20)))
 
-p<- plot_ly(
+p <- plot_ly(
   x = xcoordinates, 
   y = ycoordinates, 
   z = true_est_bimodal_normal, showscale = FALSE, colorscale = "Jet",
@@ -303,5 +298,219 @@ legend <- plot_ly(
   x = xcoordinates, 
   y = ycoordinates, 
   z = true_est_bimodal_normal, colorscale = "Jet",
+) %>% 
+  add_surface(colorbar=list(title="Density"))
+
+### Gamma-Beta Distribution ###
+
+#Estimation
+est_gamma_beta <- melt(aver_est_gamma_beta)
+names(est_gamma_beta) <- c("x", "y", "Density")
+est_gamma_beta_AKDE <- melt(aver_est_gamma_beta_AKDE)
+names(est_gamma_beta_AKDE) <- c("x", "y", "Density")
+est_gamma_beta_KNN <- melt(aver_est_gamma_beta_KNN)
+names(est_gamma_beta_KNN) <- c("x", "y", "Density")
+
+max(est_gamma_beta$Density)
+max(est_gamma_beta_AKDE$Density)
+max(est_gamma_beta_KNN$Density)
+
+end = 0.7
+size_gamma_beta <- 0.07
+plot_est_gamma_beta <- plot_ly(est_gamma_beta,  x = ~x, y = ~y, z= ~Density, type = "contour", showscale = FALSE,
+                               colorscale = 'Jet',
+                               contours = list(
+                                 start = 0,
+                                 end = end,
+                                 size = size_gamma_beta
+                               )) %>% layout(xaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                             yaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                             legend = list(font=list(size = 20)))
+
+plot_est_gamma_beta_AKDE <- plot_ly(est_gamma_beta_AKDE,  x = ~x, y = ~y, z= ~Density, type = "contour", showscale = FALSE,
+                                    colorscale = 'Jet',
+                                    contours = list(
+                                      start = 0,
+                                      end = end,
+                                      size = size_gamma_beta
+                                    )) %>% layout(xaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                                  yaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                                  legend = list(font=list(size = 20)))
+
+plot_est_gamma_beta_KNN <- plot_ly(est_gamma_beta_KNN,  x = ~x, y = ~y, z= ~Density, type = "contour", showscale = FALSE,
+                                   colorscale = 'Jet',
+                                   contours = list(
+                                     start = 0,
+                                     end = end,
+                                     size = size_gamma_beta
+                                   )) %>% layout(xaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                                 yaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                                 legend = list(font=list(size = 20)))
+
+p <- subplot(plot_est_gamma_beta, plot_est_gamma_beta_AKDE, plot_est_gamma_beta_KNN)
+legend <- plot_ly(est_gamma_beta_KNN,  x = ~x, y = ~y, z= ~Density, type = "contour",
+                  colorscale = 'Jet',
+                  contours = list(
+                    start = 0,
+                    end = end,
+                    size = size_gamma_beta
+                  )) %>% layout(xaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                yaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                legend = list(font=list(size = 20)))
+
+#RMSE
+rmse_gamma_beta <- melt(rmse_estimates_gamma_beta)
+names(rmse_gamma_beta) <- c("x", "y", "Density")
+rmse_gamma_beta_AKDE <- melt(rmse_estimates_gamma_beta_AKDE)
+names(rmse_gamma_beta_AKDE) <- c("x", "y", "Density")
+rmse_gamma_beta_KNN <- melt(rmse_estimates_gamma_beta_KNN)
+names(rmse_gamma_beta_KNN) <- c("x", "y", "Density")
+
+max(rmse_gamma_beta$Density)
+max(rmse_gamma_beta_AKDE$Density)
+max(rmse_gamma_beta_KNN$Density)
+end <- 0.35
+size_gamma_beta_rmse <- 0.035
+
+plot_rmse_gamma_beta <- plot_ly(rmse_gamma_beta,  x = ~x, y = ~y, z= ~Density, type = "contour",showscale = FALSE,
+                                colorscale = 'Jet',
+                                contours = list(
+                                  start = 0,
+                                  end = end,
+                                  size = size_gamma_beta_rmse
+                                )) %>% layout(xaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                              yaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                              legend = list(font=list(size = 20)))
+
+plot_rmse_gamma_beta_AKDE <- plot_ly(rmse_gamma_beta_AKDE,  x = ~x, y = ~y, z= ~Density, type = "contour",showscale = FALSE,
+                                     colorscale = 'Jet',
+                                     contours = list(
+                                       start = 0,
+                                       end = end,
+                                       size = size_gamma_beta_rmse
+                                     )) %>% layout(xaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                                   yaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                                   legend = list(font=list(size = 20)))
+
+plot_rmse_gamma_beta_KNN <- plot_ly(rmse_gamma_beta_KNN,  x = ~x, y = ~y, z= ~Density, type = "contour",showscale = FALSE,
+                                    colorscale = 'Jet',
+                                    contours = list(
+                                      start = 0,
+                                      end = end,
+                                      size = size_gamma_beta_rmse
+                                    )) %>% layout(xaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                                  yaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                                  legend = list(font=list(size = 20)))
+
+p <- subplot(plot_rmse_gamma_beta, plot_rmse_gamma_beta_AKDE, plot_rmse_gamma_beta_KNN)
+legend <- plot_ly(rmse_gamma_beta_KNN,  x = ~x, y = ~y, z= ~Density, type = "contour",
+                  colorscale = 'Jet',
+                  contours = list(
+                    start = 0,
+                    end = end,
+                    size = size_gamma_beta_rmse
+                  )) %>% layout(xaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                yaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                legend = list(font=list(size = 20)))
+
+#Bias
+bias_gamma_beta <- melt(bias_estimates_gamma_beta)
+names(bias_gamma_beta) <- c("x", "y", "Density")
+bias_gamma_beta_AKDE <- melt(bias_estimates_gamma_beta_AKDE)
+names(bias_gamma_beta_AKDE) <- c("x", "y", "Density")
+bias_gamma_beta_KNN <- melt(bias_estimates_gamma_beta_KNN)
+names(bias_gamma_beta_KNN) <- c("x", "y", "Density")
+
+max(bias_gamma_beta$Density)
+max(bias_gamma_beta_AKDE$Density)
+max(bias_gamma_beta_KNN$Density)
+
+min(bias_gamma_beta$Density)
+min(bias_gamma_beta_AKDE$Density)
+min(bias_gamma_beta_KNN$Density)
+
+#Grid resolution for estimates
+nx = 128
+ny = nx
+xmin = 0
+ymin = 0
+xmax = 10
+ymax = 1
+xcoordinates = seq(xmin, xmax, length.out = nx)
+ycoordinates = seq(ymin, ymax, length.out = ny)
+
+start_bias <- -0.2
+end_bias <- 0.35
+
+z_axis_gamma_beta <- list(range = c(-0.2,0.35))
+
+plot_bias_gamma_beta <- plot_ly(
+  x = xcoordinates, 
+  y = ycoordinates, 
+  z = bias_estimates_gamma_beta, showscale = FALSE, scene = "scene1", colorscale = "Jet",
+) %>% 
+  add_surface(colorbar=list(title="Density")) %>%
+  layout(scene = list(zaxis = z_axis_gamma_beta))
+
+plot_bias_gamma_beta_AKDE <- plot_ly(
+  x = xcoordinates, 
+  y = ycoordinates, 
+  z = bias_estimates_gamma_beta_AKDE, showscale = FALSE,scene = "scene2", colorscale = "Jet",
+) %>% 
+  add_surface(colorbar=list(title="Density")) %>%
+  layout(scene = list(zaxis = z_axis_gamma_beta))
+
+plot_bias_gamma_beta_KNN <- plot_ly(
+  x = xcoordinates, 
+  y = ycoordinates, 
+  z = bias_estimates_gamma_beta_KNN, showscale = FALSE,scene = "scene3", colorscale = "Jet",
+) %>% 
+  add_surface(colorbar=list(title="Density")) %>%
+  layout(scene = list(zaxis = z_axis_gamma_beta))
+
+p <- subplot(plot_bias_gamma_beta, plot_bias_gamma_beta_AKDE, plot_bias_gamma_beta_KNN)
+legend <- plot_ly(
+  x = xcoordinates, 
+  y = ycoordinates, 
+  z = bias_estimates_gamma_beta, colorscale = "Jet",
+) %>% 
+  add_surface(colorbar=list(title="Density")) %>%
+  layout(scene = list(zaxis = z_axis_gamma_beta))
+
+#True density
+true_gamma_beta <- melt(true_est_gamma_beta)
+names(true_gamma_beta) <- c("x", "y", "Density")
+
+max(true_gamma_beta$Density)
+p <- plot_ly(true_gamma_beta, x = ~x, y = ~y, z= ~Density, type = "contour", showscale = FALSE,
+             colorscale = 'Jet',
+             contours = list(
+               start = 0,
+               end = 0.62,
+               size = 0.06
+             )) %>% layout(xaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                           yaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                           legend = list(font=list(size = 20)))
+
+legend <- plot_ly(true_gamma_beta, x = ~x, y = ~y, z= ~Density, type = "contour", 
+                  colorscale = 'Jet',
+                  contours = list(
+                    start = 0,
+                    end = 0.62,
+                    size = 0.06
+                  )) %>% layout(xaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                yaxis = list(tickfont = list(size = 20), titlefont = list(size = 20), showticklabels = FALSE, showgrid = FALSE, showline = FALSE),
+                                legend = list(font=list(size = 20)))
+
+p <- plot_ly(
+  x = xcoordinates, 
+  y = ycoordinates, 
+  z = true_est_gamma_beta, showscale = FALSE, colorscale = "Jet",
+) %>% 
+  add_surface(colorbar=list(title="Density"))
+legend <- plot_ly(
+  x = xcoordinates, 
+  y = ycoordinates, 
+  z = true_est_gamma_beta, colorscale = "Jet",
 ) %>% 
   add_surface(colorbar=list(title="Density"))
